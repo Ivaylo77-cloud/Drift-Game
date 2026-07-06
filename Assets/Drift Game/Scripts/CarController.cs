@@ -31,7 +31,7 @@ public class CarController : MonoBehaviour
     {
         // Detach Sphere from car
         sphereRB.transform.parent = null;
-        normalDrag = sphereRB.drag;
+        normalDrag = sphereRB.linearDamping;
         timeFlipped = 0f;
     }
     
@@ -72,7 +72,7 @@ public class CarController : MonoBehaviour
         moveInput *= moveInput > 0 ? fwdSpeed : revSpeed;
         
         // Calculate Drag
-        sphereRB.drag = isCarGrounded ? normalDrag : modifiedDrag;
+        sphereRB.linearDamping = isCarGrounded ? normalDrag : modifiedDrag;
 
         if(isCarFlipped)
         {
