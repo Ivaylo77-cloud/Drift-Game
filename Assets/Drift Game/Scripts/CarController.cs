@@ -1,126 +1,115 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
 
 public class CarController : MonoBehaviour
 {
     public Rigidbody sphereRB;
 
     public Vector3 startPosition;
-    
-    public float fwdSpeed;
-    public float revSpeed;
-    public float turnSpeed;
+
+    public float fwdSpeed = 50f;
+    public float revSpeed = 30f;
+    public float turnSpeed = 100f;
+
     public LayerMask groundLayer;
-    public float moveInput = 0.0f;
-    public float turnInput = 0.0f;
+
     private bool isCarGrounded;
-    public bool isCarFlipped;
-    public bool isFlipping;
-    float timeFlipped;
-    [SerializeField] float timeBeforeFlip = 2f;
-    [SerializeField] float flipSpeed = 2f;
-    
+
+    public float alignToGroundTime = 5f;
+
     private float normalDrag;
-    public float modifiedDrag;
-    
-    public float alignToGroundTime;
+    public float modifiedDrag = 2f;
+
+    private CarControls controls;
+
+    private float throttleInput; // 0 → 1
+    private float brakeInput;    // 0 → 1
+    private float turnInput;     // -1 → 1
+
+
+
+    void Awake()
+    {
+        controls = new CarControls();
+    }
 
     void Start()
     {
-        // Detach Sphere from car
         sphereRB.transform.parent = null;
         normalDrag = sphereRB.linearDamping;
-        timeFlipped = 0f;
     }
-    
+
+    void OnEnable()
+    {
+        controls.Enable();
+
+        // Steering
+        controls.Driving.Steer.performed += ctx => turnInput = ctx.ReadValue<float>();
+        controls.Driving.Steer.canceled += ctx => turnInput = 0f;
+
+        // Throttle (accelerator pedal)
+        controls.Driving.Throttle.performed += ctx => throttleInput = ctx.ReadValue<float>();
+        controls.Driving.Throttle.canceled += ctx => throttleInput = 0f;
+
+        // Brake pedal
+        controls.Driving.Brake.performed += ctx => brakeInput = ctx.ReadValue<float>();
+        controls.Driving.Brake.canceled += ctx => brakeInput = 0f;
+    }
+
+    void OnDisable()
+    {
+        controls.Disable();
+    }
+
+
+
     void Update()
     {
-        if (FindObjectOfType<GameManager>().inputType == InputType.keyboard)
-        {
-            // Get Input
-            moveInput = Input.GetAxisRaw("Vertical");
-            turnInput = Input.GetAxisRaw("Horizontal");
-        }
-        moveInput = Mathf.Clamp(moveInput, -1.0f, 1.0f);
-
-        // Calculate Turning Rotation
-        float newRot = turnInput * turnSpeed * Time.deltaTime * moveInput;
-
-        if (isCarGrounded)
-            transform.Rotate(0, newRot, 0, Space.World);
-
-        // Set Cars Position to Our Sphere
-        transform.position = sphereRB.transform.position;
-        // Raycast to the ground and get normal to align car with it.
+        // Ground check
         RaycastHit hit;
-        RaycastHit upHit;
         isCarGrounded = Physics.Raycast(transform.position, -transform.up, out hit, 1f, groundLayer);
 
-        if(!isCarFlipped)
-        {
-            isCarFlipped = Physics.Raycast(transform.position, transform.up, out upHit, 1f, groundLayer);
-        }
-        
-        
-        // Rotate Car to align with ground
-        Quaternion toRotateTo = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
-        transform.rotation = Quaternion.Slerp(transform.rotation, toRotateTo, alignToGroundTime * Time.deltaTime);
-        
-        // Calculate Movement Direction
-        moveInput *= moveInput > 0 ? fwdSpeed : revSpeed;
-        
-        // Calculate Drag
-        sphereRB.linearDamping = isCarGrounded ? normalDrag : modifiedDrag;
-
-        if(isCarFlipped)
-        {
-            timeFlipped += Time.deltaTime;
-            Debug.Log("Upside Down!");
-        }
-        else
-        {
-            timeFlipped = 0f;
-        }
-
-        if(timeFlipped > timeBeforeFlip)
-        {
-            isFlipping = true;
-        }
-        if(isFlipping)
-        {
-            SelfRight();
-        }
-    }
-    private void FixedUpdate()
-    {
+        // Align to ground
         if (isCarGrounded)
-            sphereRB.AddForce(transform.forward * moveInput, ForceMode.Acceleration); // Add Movement
-        else
-            sphereRB.AddForce(Vector3.up * -400f * Time.deltaTime); // Add Gravity
+        {
+            Quaternion toRotateTo =
+                Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
+
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                toRotateTo,
+                alignToGroundTime * Time.deltaTime
+            );
+        }
+
+        // Steering
+        if (isCarGrounded)
+        {
+            float turn = turnInput * turnSpeed * Time.deltaTime * Mathf.Clamp(throttleInput, 0.2f, 1f);
+            transform.Rotate(0, turn, 0);
+        }
+
+        // Follow sphere
+        transform.position = sphereRB.transform.position;
+
+        // Drag
+        sphereRB.linearDamping = isCarGrounded ? normalDrag : modifiedDrag;
     }
 
-    void SelfRight()
+    void FixedUpdate()
     {
-        float lerpFactor = (timeFlipped - timeBeforeFlip)/flipSpeed;
-        
-        if(timeFlipped - timeBeforeFlip < flipSpeed)
-        {
-            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0f, 0f, 0f), 1.0f * Time.deltaTime);
-            Debug.Log("self righting");
-        }
-        else
-        {
-            isFlipping = false;
-            isCarFlipped = false;
-            Debug.Log("Finished Flip!");
-        }
+        // FINAL movement logic (IMPORTANT PART)
+
+        float acceleration = throttleInput * fwdSpeed;
+        float braking = brakeInput * revSpeed;
+
+        float finalForce = acceleration - braking;
+
+        sphereRB.AddForce(transform.forward * finalForce, ForceMode.Acceleration);
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "death box")
+        if (other.CompareTag("death box"))
         {
             sphereRB.transform.position = startPosition;
         }
