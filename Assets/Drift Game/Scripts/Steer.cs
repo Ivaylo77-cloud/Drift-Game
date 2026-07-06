@@ -9,29 +9,29 @@ public enum Directions
     right
 }
 
-public class St//eer : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+public class Steer : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
-    //[SerializeField] Directions steerDirection;
+    [SerializeField] Directions steerDirection;
 
-    //public bool isPressed;
+    public bool isPressed;
 
-    //public void OnPointerDown(PointerEventData data)
-    //{
-       // isPressed = true;
-       // CarController cc = FindObjectOfType<CarController>();
-       // if (steerDirection == Directions.left)
-       // {
-           // cc.turnInput = -1.0f;
-       // }
-       // else
-       // {
-         //   cc.turnInput = 1.0f;
-       // }
+    public void OnPointerDown(PointerEventData data)
+    {
+        isPressed = true;
+        CarController cc = FindObjectOfType<CarController>();
+        if (steerDirection == Directions.left)
+        {
+            //cc.turnInput = -1.0f;
+        }
+        else
+        {
+            //cc.turnInput = 1.0f;
+        }
     }
-  //  public void OnPointerUp(PointerEventData data)
- //   {
-  //      isPressed = false;
-  //      CarController cc = FindObjectOfType<CarController>();
-  //      cc.turnInput = 0.0f;
-  //  }
-//}
+    public void OnPointerUp(PointerEventData data)
+    {
+        isPressed = false;
+        CarController cc = FindObjectOfType<CarController>();
+       // cc.turnInput = 0.0f;
+    }
+}

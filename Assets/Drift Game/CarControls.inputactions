@@ -12,6 +12,7 @@
                     "id": "80ca8c95-b869-42e3-9993-f3fca76d0620",
                     "expectedControlType": "Axis",
                     "processors": "",
+                    "interactions": "",
                     "initialStateCheck": true
                 },
                 {
