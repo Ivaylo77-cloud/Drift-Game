@@ -21,17 +21,17 @@ public class Steer : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         CarController cc = FindObjectOfType<CarController>();
         if (steerDirection == Directions.left)
         {
-            //cc.turnInput = -1.0f;
+            cc.turnInput = -1.0f;
         }
         else
         {
-            //cc.turnInput = 1.0f;
+            cc.turnInput = 1.0f;
         }
     }
     public void OnPointerUp(PointerEventData data)
     {
         isPressed = false;
         CarController cc = FindObjectOfType<CarController>();
-       // cc.turnInput = 0.0f;
+        cc.turnInput = 0.0f;
     }
 }

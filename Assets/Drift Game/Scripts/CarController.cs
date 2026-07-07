@@ -6,26 +6,28 @@ public class CarController : MonoBehaviour
 
     public Vector3 startPosition;
 
-    public float fwdSpeed = 50f;
-    public float revSpeed = 30f;
-    public float turnSpeed = 100f;
-
+    public float fwdSpeed;
+    public float revSpeed;
+    public float turnSpeed;
     public LayerMask groundLayer;
 
-    private bool isCarGrounded;
+    public float moveInput;
+    public float turnInput;
 
-    public float alignToGroundTime = 5f;
+    private bool isCarGrounded;
+    public bool isCarFlipped;
+    public bool isFlipping;
+
+    float timeFlipped;
+    [SerializeField] float timeBeforeFlip = 2f;
+    [SerializeField] float flipSpeed = 2f;
 
     private float normalDrag;
-    public float modifiedDrag = 2f;
+    public float modifiedDrag;
+
+    public float alignToGroundTime;
 
     private CarControls controls;
-
-    private float throttleInput; // 0 → 1
-    private float brakeInput;    // 0 → 1
-    private float turnInput;     // -1 → 1
-
-
 
     void Awake()
     {
@@ -35,24 +37,38 @@ public class CarController : MonoBehaviour
     void Start()
     {
         sphereRB.transform.parent = null;
-        normalDrag = sphereRB.linearDamping;
+        normalDrag = sphereRB.linearDamping; // FIX: use drag (not linearDamping)
+        timeFlipped = 0f;
     }
 
     void OnEnable()
     {
         controls.Enable();
 
-        // Steering
         controls.Driving.Steer.performed += ctx => turnInput = ctx.ReadValue<float>();
         controls.Driving.Steer.canceled += ctx => turnInput = 0f;
 
-        // Throttle (accelerator pedal)
-        controls.Driving.Throttle.performed += ctx => throttleInput = ctx.ReadValue<float>();
-        controls.Driving.Throttle.canceled += ctx => throttleInput = 0f;
+        controls.Driving.Throttle.performed += ctx => moveInput = ctx.ReadValue<float>();
+        controls.Driving.Throttle.canceled += ctx => moveInput = 0f;
 
-        // Brake pedal
-        controls.Driving.Brake.performed += ctx => brakeInput = ctx.ReadValue<float>();
-        controls.Driving.Brake.canceled += ctx => brakeInput = 0f;
+        controls.Driving.Brake.performed += ctx =>
+        {
+            float brake = ctx.ReadValue<float>();
+
+            // Ignore tiny values at rest.
+            if (brake < 0.1f)
+            {
+                moveInput = 0f;
+                return;
+            }
+
+            moveInput = -brake;
+        };
+
+        controls.Driving.Brake.canceled += ctx =>
+        {
+            moveInput = 0f;
+        };
     }
 
     void OnDisable()
@@ -60,15 +76,28 @@ public class CarController : MonoBehaviour
         controls.Disable();
     }
 
-
-
     void Update()
     {
-        // Ground check
+        moveInput = Mathf.Clamp(moveInput, -1f, 1f);
+
+        float newRot = turnInput * turnSpeed * Time.deltaTime * moveInput;
+
+        if (isCarGrounded)
+            transform.Rotate(0, newRot, 0, Space.World);
+
+        transform.position = sphereRB.transform.position;
+
         RaycastHit hit;
+        RaycastHit upHit;
+
         isCarGrounded = Physics.Raycast(transform.position, -transform.up, out hit, 1f, groundLayer);
 
-        // Align to ground
+        if (!isCarFlipped)
+        {
+            isCarFlipped = Physics.Raycast(transform.position, transform.up, out upHit, 1f, groundLayer);
+        }
+
+        // Align to ground (safe check added)
         if (isCarGrounded)
         {
             Quaternion toRotateTo =
@@ -81,30 +110,63 @@ public class CarController : MonoBehaviour
             );
         }
 
-        // Steering
-        if (isCarGrounded)
+        // Speed calculation FIX (don’t overwrite input)
+        float speed = moveInput > 0 ? fwdSpeed : revSpeed;
+        float finalMove = moveInput * speed;
+
+        sphereRB.linearDamping = isCarGrounded ? normalDrag : modifiedDrag;
+
+        // Flip detection
+        if (isCarFlipped)
         {
-            float turn = turnInput * turnSpeed * Time.deltaTime * Mathf.Clamp(throttleInput, 0.2f, 1f);
-            transform.Rotate(0, turn, 0);
+            timeFlipped += Time.deltaTime;
+        }
+        else
+        {
+            timeFlipped = 0f;
         }
 
-        // Follow sphere
-        transform.position = sphereRB.transform.position;
+        if (timeFlipped > timeBeforeFlip)
+        {
+            isFlipping = true;
+        }
 
-        // Drag
-        sphereRB.linearDamping = isCarGrounded ? normalDrag : modifiedDrag;
+        if (isFlipping)
+        {
+            SelfRight();
+        }
     }
 
     void FixedUpdate()
     {
-        // FINAL movement logic (IMPORTANT PART)
+        float speed = moveInput > 0 ? fwdSpeed : revSpeed;
+        float finalMove = moveInput * speed;
 
-        float acceleration = throttleInput * fwdSpeed;
-        float braking = brakeInput * revSpeed;
+        if (isCarGrounded)
+        {
+            sphereRB.AddForce(transform.forward * finalMove, ForceMode.Acceleration);
+        }
+        else
+        {
+            sphereRB.AddForce(Vector3.down * 400f * Time.deltaTime);
+        }
+    }
 
-        float finalForce = acceleration - braking;
-
-        sphereRB.AddForce(transform.forward * finalForce, ForceMode.Acceleration);
+    void SelfRight()
+    {
+        if (timeFlipped - timeBeforeFlip < flipSpeed)
+        {
+            transform.rotation = Quaternion.Lerp(
+                transform.rotation,
+                Quaternion.Euler(0f, 0f, 0f),
+                Time.deltaTime * 2f
+            );
+        }
+        else
+        {
+            isFlipping = false;
+            isCarFlipped = false;
+        }
     }
 
     void OnTriggerEnter(Collider other)

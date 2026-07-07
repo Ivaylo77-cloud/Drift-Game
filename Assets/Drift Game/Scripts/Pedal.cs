@@ -21,17 +21,17 @@ public class Pedal : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         CarController cc = FindObjectOfType<CarController>();
         if (pedalType == Pedals.brake)
         {
-            //cc.moveInput = -1.0f;
+            cc.moveInput = -1.0f;
         }
         else
         {
-            //cc.moveInput = 1.0f;
+            cc.moveInput = 1.0f;
         }
     }
     public void OnPointerUp(PointerEventData data)
     {
         isPressed = false;
         CarController cc = FindObjectOfType<CarController>();
-       // cc.moveInput = 0.0f;
+        cc.moveInput = 0.0f;
     }
 }

@@ -106,7 +106,7 @@ public partial class @CarControls: IInputActionCollection2, IDisposable
                     ""type"": ""Value"",
                     ""id"": ""4b21408f-3ad5-41a6-92dd-462ba0acebb4"",
                     ""expectedControlType"": ""Axis"",
-                    ""processors"": """",
+                    ""processors"": ""Invert"",
                     ""interactions"": """",
                     ""initialStateCheck"": true
                 },
@@ -115,7 +115,7 @@ public partial class @CarControls: IInputActionCollection2, IDisposable
                     ""type"": ""Value"",
                     ""id"": ""0ace40b0-7fbe-4db3-896c-f49360e654da"",
                     ""expectedControlType"": ""Axis"",
-                    ""processors"": """",
+                    ""processors"": ""Invert"",
                     ""interactions"": """",
                     ""initialStateCheck"": true
                 }
@@ -170,7 +170,7 @@ public partial class @CarControls: IInputActionCollection2, IDisposable
                     ""id"": ""60b4e471-1a0f-4b69-8c98-a75a7a14712e"",
                     ""path"": ""<HID::Logitech G29 Driving Force Racing Wheel>/z"",
                     ""interactions"": """",
-                    ""processors"": ""Invert"",
+                    ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Throttle"",
                     ""isComposite"": false,

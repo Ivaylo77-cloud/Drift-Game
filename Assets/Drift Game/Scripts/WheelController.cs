@@ -31,8 +31,8 @@ public class WheelController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //moveInput = cc.moveInput;
-        //turnInput = cc.turnInput;
+        moveInput = cc.moveInput;
+        turnInput = cc.turnInput;
 
         foreach (var wheel in wheelsToRotate)
         {
