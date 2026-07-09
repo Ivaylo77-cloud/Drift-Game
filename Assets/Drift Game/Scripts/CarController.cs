@@ -48,27 +48,7 @@ public class CarController : MonoBehaviour
         controls.Driving.Steer.performed += ctx => turnInput = ctx.ReadValue<float>();
         controls.Driving.Steer.canceled += ctx => turnInput = 0f;
 
-        controls.Driving.Throttle.performed += ctx => moveInput = ctx.ReadValue<float>();
-        controls.Driving.Throttle.canceled += ctx => moveInput = 0f;
-
-        controls.Driving.Brake.performed += ctx =>
-        {
-            float brake = ctx.ReadValue<float>();
-
-            // Ignore tiny values at rest.
-            if (brake < 0.1f)
-            {
-                moveInput = 0f;
-                return;
-            }
-
-            moveInput = -brake;
-        };
-
-        controls.Driving.Brake.canceled += ctx =>
-        {
-            moveInput = 0f;
-        };
+        
     }
 
     void OnDisable()
@@ -78,6 +58,14 @@ public class CarController : MonoBehaviour
 
     void Update()
     {
+        float throttle = controls.Driving.Throttle.ReadValue<float>();
+        float brake = controls.Driving.Brake.ReadValue<float>();
+
+        moveInput = Mathf.Clamp(throttle - brake, -1f, 1f);
+
+        turnInput = controls.Driving.Steer.ReadValue<float>();
+
+
         moveInput = Mathf.Clamp(moveInput, -1f, 1f);
 
         float newRot = turnInput * turnSpeed * Time.deltaTime * moveInput;

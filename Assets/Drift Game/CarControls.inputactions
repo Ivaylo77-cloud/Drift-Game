@@ -117,7 +117,7 @@
                     "id": "c0ca05de-d67c-4951-af9f-e10c9a5afd44",
                     "path": "<Keyboard>/s",
                     "interactions": "",
-                    "processors": "",
+                    "processors": "Invert",
                     "groups": "",
                     "action": "Brake",
                     "isComposite": false,
