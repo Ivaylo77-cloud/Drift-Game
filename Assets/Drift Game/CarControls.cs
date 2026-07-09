@@ -181,7 +181,7 @@ public partial class @CarControls: IInputActionCollection2, IDisposable
                     ""id"": ""faabe4a2-6eff-4b02-812d-ff244b4ba628"",
                     ""path"": ""<Keyboard>/w"",
                     ""interactions"": """",
-                    ""processors"": """",
+                    ""processors"": ""Invert"",
                     ""groups"": """",
                     ""action"": ""Throttle"",
                     ""isComposite"": false,
