@@ -16,7 +16,7 @@ public class CarController : MonoBehaviour
 
     private bool isCarGrounded;
     public bool isCarFlipped;
-    public bool isFlipping;
+
 
     float timeFlipped;
     [SerializeField] float timeBeforeFlip = 2f;
@@ -80,23 +80,9 @@ public class CarController : MonoBehaviour
 
         isCarGrounded = Physics.Raycast(transform.position, -transform.up, out hit, 1f, groundLayer);
 
-        if (!isCarFlipped)
-        {
-            isCarFlipped = Physics.Raycast(transform.position, transform.up, out upHit, 1f, groundLayer);
-        }
+        
 
-        // Align to ground (safe check added)
-        if (isCarGrounded)
-        {
-            Quaternion toRotateTo =
-                Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
 
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                toRotateTo,
-                alignToGroundTime * Time.deltaTime
-            );
-        }
 
         // Speed calculation FIX (don’t overwrite input)
         float speed = moveInput > 0 ? fwdSpeed : revSpeed;
@@ -105,24 +91,7 @@ public class CarController : MonoBehaviour
         sphereRB.linearDamping = isCarGrounded ? normalDrag : modifiedDrag;
 
         // Flip detection
-        if (isCarFlipped)
-        {
-            timeFlipped += Time.deltaTime;
-        }
-        else
-        {
-            timeFlipped = 0f;
-        }
-
-        if (timeFlipped > timeBeforeFlip)
-        {
-            isFlipping = true;
-        }
-
-        if (isFlipping)
-        {
-            SelfRight();
-        }
+        
     }
 
     void FixedUpdate()
@@ -140,22 +109,6 @@ public class CarController : MonoBehaviour
         }
     }
 
-    void SelfRight()
-    {
-        if (timeFlipped - timeBeforeFlip < flipSpeed)
-        {
-            transform.rotation = Quaternion.Lerp(
-                transform.rotation,
-                Quaternion.Euler(0f, 0f, 0f),
-                Time.deltaTime * 2f
-            );
-        }
-        else
-        {
-            isFlipping = false;
-            isCarFlipped = false;
-        }
-    }
 
     void OnTriggerEnter(Collider other)
     {

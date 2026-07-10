@@ -80,6 +80,39 @@
                     "isPartOfComposite": true
                 },
                 {
+                    "name": "1D Axis",
+                    "id": "b3578053-7053-4c81-bc6b-fba12df4b5a3",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Steer",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "1dff3fab-4000-4c02-aeff-000e033c663f",
+                    "path": "<DualShockGamepad>/leftStick/left",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Steer",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "31500026-abd3-49b9-a3c1-4fcfa1e0cecd",
+                    "path": "<DualShockGamepad>/leftStick/right",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Steer",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "",
                     "id": "60b4e471-1a0f-4b69-8c98-a75a7a14712e",
                     "path": "<HID::Logitech G29 Driving Force Racing Wheel>/z",
@@ -103,6 +136,17 @@
                 },
                 {
                     "name": "",
+                    "id": "2d93bd6a-b52f-4969-ab62-b2ffa3ae06e0",
+                    "path": "<DualShockGamepad>/rightTrigger",
+                    "interactions": "",
+                    "processors": "Invert",
+                    "groups": "",
+                    "action": "Throttle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "57795a41-1e99-45d3-91e1-6360fce072d1",
                     "path": "<HID::Logitech G29 Driving Force Racing Wheel>/rz",
                     "interactions": "",
@@ -116,6 +160,17 @@
                     "name": "",
                     "id": "c0ca05de-d67c-4951-af9f-e10c9a5afd44",
                     "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "Invert",
+                    "groups": "",
+                    "action": "Brake",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fdb4069e-d0ba-4ef3-bab5-f8e306c59846",
+                    "path": "<DualShockGamepad>/leftTrigger",
                     "interactions": "",
                     "processors": "Invert",
                     "groups": "",
