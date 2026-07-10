@@ -27,6 +27,9 @@ public class CarController : MonoBehaviour
 
     public float alignToGroundTime;
 
+    public ParticleSystem leftSmoke;
+    public ParticleSystem rightSmoke;
+
     private CarControls controls;
 
     void Awake()
@@ -90,8 +93,31 @@ public class CarController : MonoBehaviour
 
         sphereRB.linearDamping = isCarGrounded ? normalDrag : modifiedDrag;
 
+        float carSpeed = sphereRB.linearVelocity.magnitude;
+
+        bool drifting = Mathf.Abs(turnInput) > 0.5f && carSpeed > 12f;
+
+        if (drifting)
+        {
+            if (!leftSmoke.isPlaying)
+                leftSmoke.Play();
+
+            if (!rightSmoke.isPlaying)
+                rightSmoke.Play();
+        }
+        else
+        {
+            if (leftSmoke.isPlaying)
+                leftSmoke.Stop();
+
+            if (rightSmoke.isPlaying)
+                rightSmoke.Stop();
+        }
+
         // Flip detection
-        
+
+
+
     }
 
     void FixedUpdate()
